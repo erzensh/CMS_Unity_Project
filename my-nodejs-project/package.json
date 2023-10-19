@@ -1,0 +1,17 @@
+{
+  "name": "my-nodejs-project",
+  "version": "1.0.1",
+  "description": "Nodejs CMS Application",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "Erzen Shabani",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3",
+    "express-handlebars": "^4.0.0"
+  }
+}
