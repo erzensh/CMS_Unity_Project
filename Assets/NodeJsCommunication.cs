@@ -1,37 +1,40 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections;
 
 public class NodeJsCommunication : MonoBehaviour
 {
-    private const string serverUrl = "https://localhost:3000"; // Use the correct URL
-
-    void Start()
+    IEnumerator Start()
     {
-        StartCoroutine(SendDataToServer());
-    }
+        Debug.Log("Sending HTTP request...");
 
-    IEnumerator SendDataToServer()
-    {
-        // Ensure your JSON data is well-formed
-        string jsonData = "{\"playerName\":\"John\",\"score\":100}";
-
-        // Create a UnityWebRequest to send a POST request
-        using (UnityWebRequest www = UnityWebRequest.Post($"{serverUrl}", jsonData))
+        using (UnityWebRequest www = UnityWebRequest.Get("https://localhost:8443"))
         {
-            www.SetRequestHeader("Content-Type", "application/json");
+            www.certificateHandler = new BypassCertificate();
 
-            // Send the request and wait for a response
+            // Add headers to handle potential CORS issues
+            www.SetRequestHeader("Origin", "http://localhost:8443");
+
+
             yield return www.SendWebRequest();
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("Server response: " + www.downloadHandler.text);
+                Debug.Log("Request successful. Response: " + www.downloadHandler.text);
             }
             else
             {
-                Debug.LogError("Error: " + www.error);
+                Debug.LogError("Request failed. Error: " + www.error);
             }
+        }
+    }
+
+    public class BypassCertificate : CertificateHandler
+    {
+        protected override bool ValidateCertificate(byte[] certificateData)
+        {
+            // Allow all certificates
+            return true;
         }
     }
 }

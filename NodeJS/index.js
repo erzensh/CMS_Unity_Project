@@ -1,21 +1,35 @@
-const dgram = require('dgram')
-const server = dgram.createSocket('udp4')
+const express = require('express');
+const mongoose = require('mongoose');
+const path = require('path');
 
-server.on('error', (error) => {
-console.log('error on the server \n' +error.message)
-server.close()
+const app = express();
+
+/* Configure Mongoose to Connect to MongoDB */
+mongoose.connect('mongodb://localhost:27017/cms', { useNewUrlParser: true, useUnifiedTopology: true });
+
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.once('open', () => {
+    console.log('MongoDB Connected Successfully.');
 });
 
-server.on('listening',()=>{
-    const address = server.address()
-    console.log(`server is listening on ${address.address}:${address.port}`)
-})
 
-server.on('message', (message, senderInfo)=>{
-    console.log('Message received')
-    server.send(message, senderInfo.port, senderInfo.address, ()=>{
-        console.log('Message have been sent to ${senderInfo.address}:${senderInfo.port}')
-    })
-})
+/* Configure Express */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-server.bind(5501);
+
+/* Routes */
+app.use('/', (req, res) =>{
+    res.send("Welcome to the CMS App");
+});
+
+
+
+
+app.listen(3000, () => {
+    console.log(`Server is running on port 3000`);
+});

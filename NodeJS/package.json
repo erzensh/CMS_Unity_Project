@@ -4,12 +4,19 @@
   "description": "NodeJS CMS Application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
   "keywords": [],
   "dependencies": {
-    "dgram": "^1.0.1"
+    "dgram": "^1.0.1",
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3"
+  },
+  "devDependencies": {
+    "demon": "^0.0.1",
+    "express": "4.18.2",
+    "mongoose": "^7.6.3"
   }
 }
