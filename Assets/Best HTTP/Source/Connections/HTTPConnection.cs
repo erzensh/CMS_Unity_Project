@@ -175,7 +175,6 @@ namespace BestHTTP.Connections
 
 #if (!UNITY_WEBGL || UNITY_EDITOR) && !BESTHTTP_DISABLE_ALTERNATE_SSL && !BESTHTTP_DISABLE_HTTP2
                     case HTTPProtocolFactory.W3C_HTTP2:
-                        this.requestHandler = new Connections.HTTP2.HTTP2Handler(this);
                         this.CurrentRequest = null;
                         ConnectionEventHelper.EnqueueConnectionEvent(new ConnectionEventInfo(this, HostProtocolSupport.HTTP2));
                         break;

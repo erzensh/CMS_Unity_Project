@@ -65,8 +65,10 @@ namespace BestHTTP.Connections.HTTP2
         // Streams initiated by a client MUST use odd-numbered stream identifiers
         // With an initial value of -1, the first client initiated stream's id going to be 1.
         private long LastStreamId = -1;
+        private HTTPRequest request;
+        private HTTP2Settings settings1;
 
-        public HTTP2Handler(HTTPConnection conn)
+        public HTTP2Handler(HTTPRequest request, HTTPConnection conn)
         {
             this.Context = new LoggingContext(this);
 
@@ -76,6 +78,12 @@ namespace BestHTTP.Connections.HTTP2
             this.settings = new HTTP2SettingsManager(this);
 
             Process(this.conn.CurrentRequest);
+        }
+
+        public HTTP2Handler(HTTPRequest request, HTTP2Settings settings1)
+        {
+            this.request = request;
+            this.settings1 = settings1;
         }
 
         public void Process(HTTPRequest request)
