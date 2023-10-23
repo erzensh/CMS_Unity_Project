@@ -1,35 +1,33 @@
 using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 public class Http2Example : MonoBehaviour
 {
-    // Replace this URL with your actual endpoint
-    private const string RequestUrl = "https://localhost:3000";
-
-    void Start()
+    async void Start()
     {
-        StartCoroutine(MakeHttp2Request());
+        await GetDataFromServer();
     }
 
-    IEnumerator MakeHttp2Request()
+    async Task GetDataFromServer()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get(RequestUrl))
+        string url = "http://localhost:3000"; // Change this URL to your server's endpoint
+
+        using (HttpClient httpClient = new HttpClient())
         {
-            www.useHttpContinue = false; // Ensure HTTP/2 is used
+            HttpResponseMessage response = await httpClient.GetAsync(url);
 
-            // Send the request and wait for a response
-            yield return www.SendWebRequest();
-
-            // Check for errors
-            if (www.isNetworkError || www.isHttpError)
+            if (response.IsSuccessStatusCode)
             {
-                Debug.LogError($"HTTP request error: {www.error}");
+                // Handle successful response
+                string responseData = await response.Content.ReadAsStringAsync();
+                Debug.Log("Received: " + responseData);
             }
             else
             {
-                // Log the response text
-                Debug.Log($"HTTP request successful. Response: {www.downloadHandler.text}");
+                // Handle error
+                Debug.LogError("Error: " + response.ReasonPhrase);
             }
         }
     }

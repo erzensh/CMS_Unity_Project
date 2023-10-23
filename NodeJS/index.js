@@ -5,17 +5,14 @@ const path = require('path');
 const app = express();
 
 /* Configure Mongoose to Connect to MongoDB */
-mongoose.connect('mongodb://localhost:27017/cms', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://127.0.0.1:27017/cms', {useNewUrlParser: true})
+    .then(response => {
+        console.log("MongoDB connected successfully.");
+    }) .catch(err => {
+        console.log("Database connection failed.");
+    })
 
-const db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-db.once('open', () => {
-    console.log('MongoDB Connected Successfully.');
-});
-
-
+    
 /* Configure Express */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
