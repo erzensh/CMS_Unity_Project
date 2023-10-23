@@ -14,7 +14,8 @@
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "http2": "^3.3.7",
-    "mongoose": "^7.6.3"
+    "mongoose": "^7.6.3",
+    "spdy": "^4.0.2"
   },
   "devDependencies": {
     "demon": "^0.0.1",

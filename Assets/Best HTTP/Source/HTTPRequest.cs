@@ -19,6 +19,7 @@ namespace BestHTTP
     using BestHTTP.Connections;
     using BestHTTP.Logger;
     using BestHTTP.Timings;
+    using BestHTTP.Connections.HTTP2;
 
     /// <summary>
     /// Possible logical states of a HTTTPRequest object.
@@ -1478,6 +1479,8 @@ namespace BestHTTP
         {
             get { return this; }
         }
+
+        public HTTP2Handler ProtocolHandler { get; set; }
 
         public void Dispose()
         {

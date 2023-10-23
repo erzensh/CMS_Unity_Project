@@ -1,34 +1,51 @@
+using System;
+using BestHTTP;
+using BestHTTP.Connections;
+using BestHTTP.Connections.HTTP2;
+using BestHTTP.Core;
 using UnityEngine;
-using System.Collections;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-public class Http2Example : MonoBehaviour
+public sealed class Http2Example : MonoBehaviour
 {
-    async void Start()
+    public string ServerURL;
+
+    private Uri serverUri;
+    private string key = null;
+    private double lastPrintedLatency = 0;
+
+    private void Start()
     {
-        await GetDataFromServer();
+        serverUri = new Uri(ServerURL);
+
+        // Log that the script has started
+        Debug.Log("Http2Example script started.");
     }
 
-    async Task GetDataFromServer()
+    private void Update()
     {
-        string url = "http://localhost:3000"; // Change this URL to your server's endpoint
+        // Cache the Server+Proxy unique key. It expects that the global Proxy isn't changing.
+        if (string.IsNullOrEmpty(key))
+            key = HostDefinition.GetKeyFor(serverUri, HTTPManager.Proxy);
 
-        using (HttpClient httpClient = new HttpClient())
+        // For the given Server+Proxy combination, find an HTTPConnection that has an HTTP2Handler
+        var httpConnection = HostManager.GetHost(serverUri.Host)
+            .GetHostDefinition(key)
+            .Find(con => con is HTTPConnection http && http.requestHandler is HTTP2Handler) as HTTPConnection;
+
+        // No connection yet
+        if (httpConnection == null)
         {
-            HttpResponseMessage response = await httpClient.GetAsync(url);
+            Debug.Log("No HTTP2 connection yet.");
+            return;
+        }
 
-            if (response.IsSuccessStatusCode)
-            {
-                // Handle successful response
-                string responseData = await response.Content.ReadAsStringAsync();
-                Debug.Log("Received: " + responseData);
-            }
-            else
-            {
-                // Handle error
-                Debug.LogError("Error: " + response.ReasonPhrase);
-            }
+        // Get the HTTP2Handler and print latency. If Latency is zero, no ping ack received from the server yet.
+        if (httpConnection.requestHandler is HTTP2Handler http2handler &&
+            http2handler.Latency > 0 &&
+            lastPrintedLatency != http2handler.Latency)
+        {
+            lastPrintedLatency = http2handler.Latency;
+            Debug.Log($"HTTP2 Latency: {lastPrintedLatency}");
         }
     }
 }
