@@ -10,16 +10,17 @@
   "license": "ISC",
   "keywords": [],
   "dependencies": {
+    "cors": "^2.8.5",
     "dgram": "^1.0.1",
-    "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "http2": "^3.3.7",
-    "mongoose": "^7.6.3",
-    "spdy": "^4.0.2"
+    "spdy": "^4.0.2",
+    "ws": "^8.14.2",
+    "wss": "^3.3.4"
   },
   "devDependencies": {
     "demon": "^0.0.1",
-    "express": "4.18.2",
+    "express": "^4.18.2",
     "mongoose": "^7.6.3"
   }
 }
