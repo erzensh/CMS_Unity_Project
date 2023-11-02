@@ -8,7 +8,10 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
+            /* background-image: url('sidekix-media-0sDzRgrN_pI-unsplash.jpg'); */
+            /* Replace 'backgroundImg.jpg' with your actual image path */
+            background-size: cover;
+            background-position: center;
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,14 +22,16 @@
         }
 
         h1 {
-            color: #333;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
         }
 
         .form-container {
             display: none;
             width: 300px;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
@@ -51,7 +56,8 @@
 
         button {
             padding: 10px;
-            background-color: #4caf50;
+            background-color: #6b8e23;
+            /* Olive Green button color */
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -59,7 +65,8 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #556b2f;
+            /* Dark Olive Green on hover */
         }
 
         #cardContainer {
@@ -72,7 +79,7 @@
             width: 300px;
             margin: 10px;
             padding: 15px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
@@ -82,13 +89,14 @@
         }
 
         .card p {
-            color: #666;
+            color: #555;
             margin-bottom: 10px;
         }
 
         .edit-button {
             padding: 8px;
-            background-color: #3498db;
+            background-color: #8b4513;
+            /* Saddle Brown for edit button */
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -96,22 +104,23 @@
         }
 
         .edit-button:hover {
-            background-color: #2980b9;
+            background-color: #7b3f00;
+            /* Darker Saddle Brown on hover */
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>CMS Form</h1>
+        <h1>Sanitary Catalog</h1>
 
         <!-- Button to toggle form visibility -->
-        <button type="button" onclick="toggleFormVisibility()">New</button>
+        <button type="button" onclick="toggleFormVisibility()">Add New Item</button>
 
         <!-- Form to add new entries -->
         <div class="form-container">
             <form id="cmsForm">
-                <label for="name">Name:</label>
+                <label for="name">Item Name:</label>
                 <input type="text" id="name" name="name" required>
                 <br>
 
@@ -149,6 +158,7 @@
             <button type="button" onclick="saveChanges()">Save Changes</button>
         </form>
     </div>
+
 
     <script>
         // Variable to store the currently edited card
