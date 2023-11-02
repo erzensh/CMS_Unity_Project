@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS Form</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .form-container {
+            display: none;
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .card {
+            width: 300px;
+            margin: 10px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .card h3 {
+            color: #333;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .edit-button {
+            padding: 8px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>CMS Form</h1>
+
+        <!-- Button to toggle form visibility -->
+        <button type="button" onclick="toggleFormVisibility()">New</button>
+
+        <!-- Form to add new entries -->
+        <div class="form-container">
+            <form id="cmsForm">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <br>
+
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required>
+                <br>
+
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" required>
+                <br>
+
+                <button type="button" onclick="submitForm()">Submit</button>
+            </form>
+        </div>
+
+        <!-- Cards for existing entries -->
+        <div id="cardContainer"></div>
+    </div>
+
+    <!-- Add a container for the edit form -->
+    <div id="editFormContainer" class="form-container" style="display: none;">
+        <form id="editForm">
+            <label for="edit-name">Edit Name:</label>
+            <input type="text" id="edit-name" name="edit-name" required>
+            <br>
+
+            <label for="edit-description">Edit Description:</label>
+            <input type="text" id="edit-description" name="edit-description" required>
+            <br>
+
+            <label for="edit-url">Edit URL:</label>
+            <input type="text" id="edit-url" name="edit-url" required>
+            <br>
+
+            <button type="button" onclick="saveChanges()">Save Changes</button>
+        </form>
+    </div>
+
+    <script>
+        // Variable to store the currently edited card
+        let currentlyEditedCard = null;
+
+        function toggleFormVisibility() {
+            const formContainer = document.querySelector('.form-container');
+            formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function submitForm() {
+            var formData = {
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                url: document.getElementById("url").value
+            };
+
+            // Send a POST request to update data on the server
+            fetch('http://localhost:5000/addData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+
+                    // If the submission is successful, add a new card to the cardContainer
+                    if (data.success) {
+                        addCard(formData);
+                    }
+
+                    // Hide the form
+                    toggleFormVisibility();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function addCard(data) {
+            const cardContainer = document.getElementById('cardContainer');
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            // Assuming the server response provides a unique ID for the new entry
+            // const entryId = data.id;
+            // card.id = `card-${entryId}`;
+            const entryId = data.id; // Make sure data.id is correctly set
+            card.id = `card-${entryId}`;
+            const nameHeading = document.createElement('h3');
+            nameHeading.textContent = `Name: ${data.name}`;
+
+            const descriptionParagraph = document.createElement('p');
+            descriptionParagraph.textContent = data.description;
+
+            const urlParagraph = document.createElement('p');
+            urlParagraph.textContent = `URL: ${data.url}`;
+
+            const editButton = document.createElement('button');
+            editButton.className = 'edit-button';
+            editButton.textContent = 'Edit';
+            editButton.onclick = function () {
+                // Display an edit form
+                displayEditForm(card, data);
+            };
+
+            card.appendChild(nameHeading);
+            card.appendChild(descriptionParagraph);
+            card.appendChild(urlParagraph);
+            card.appendChild(editButton);
+
+            cardContainer.appendChild(card);
+        }
+
+        function displayEditForm(card, data) {
+            console.log('Received data for editing:', data);
+            // Set the values of the edit form fields
+            document.getElementById('edit-name').value = data.name;
+            document.getElementById('edit-description').value = data.description;
+            document.getElementById('edit-url').value = data.url;
+            currentlyEditedCard = {
+                id: data.id, // Make sure data.id is correctly set
+                name: data.name,
+                description: data.description,
+                url: data.url,
+            };
+            // Set the currently edited card
+            currentlyEditedCard = data;
+            console.log('Currently edited card:', currentlyEditedCard);
+            // Display the edit form
+            document.getElementById('editFormContainer').style.display = 'block';
+        }
+
+        function saveChanges() {
+    if (currentlyEditedCard) {
+        const editedName = document.getElementById('edit-name').value;
+        const editedDescription = document.getElementById('edit-description').value;
+        const editedUrl = document.getElementById('edit-url').value;
+
+        // Update the currently edited card with the edited information
+        currentlyEditedCard.name = editedName;
+        currentlyEditedCard.description = editedDescription;
+        currentlyEditedCard.url = editedUrl;
+
+        // Send a POST request to update the data on the server
+        fetch('http://localhost:5000/updateData', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: currentlyEditedCard.id,
+                name: editedName,
+                description: editedDescription,
+                url: editedUrl,
+            }),
+        })
+            .then(response => response.json())
+            .then(updatedData => {
+                console.log('Success:', updatedData);
+
+                // Optionally, handle success or error response from the server
+
+                // Hide the edit form
+                document.getElementById('editFormContainer').style.display = 'none';
+
+                // Reset the currently edited card
+                currentlyEditedCard = null;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+}
+
+
+
+
+
+        function updateCard(updatedData) {
+            // Update the card content with the new information
+            const card = document.getElementById(`card-${updatedData.id}`);
+            if (card) {
+                card.querySelector('h3').textContent = `Name: ${updatedData.name}`;
+                card.querySelector('p').textContent = updatedData.description;
+                card.querySelector('p:last-child').textContent = `URL: ${updatedData.url}`;
+            }
+        }
+
+
+        // Fetch and display existing data on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('http://localhost:5000/allData')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => addCard(item));
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+
+    </script>
+
+
+
+</body>
+
+</html>

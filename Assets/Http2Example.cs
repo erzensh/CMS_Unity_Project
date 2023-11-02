@@ -1,76 +1,119 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using BestHTTP;
-
+using BestHTTP.WebSocket;
+using System.Collections;
 public class Http2Example : MonoBehaviour
 {
-    public Text aName;
-    public Text aDescription;
-    public Text aTheLink;
-    public Button downloadButton;
+    public Transform panelContainer;
+    public GameObject panelPrefab;
+
+    private WebSocket webSocket;
 
     void Start()
     {
-        // Attach a click event to the download button
-        downloadButton.onClick.AddListener(OnDownloadButtonClick);
-
+        ConnectWebSocket();
         RefreshData();
+    }
+
+    void ConnectWebSocket()
+    {
+        webSocket = new WebSocket(new System.Uri("ws://localhost:5000"));
+        webSocket.OnMessage += OnWebSocketMessage;
+        webSocket.Open();
+    }
+
+    void OnWebSocketMessage(WebSocket ws, string message)
+    {
+        // Handle WebSocket message
+        Debug.Log("Received message from server: " + message);
+
+        // Parse the message and update Unity panels accordingly
+        Data newData = JsonUtility.FromJson<Data>(message);
+        InstantiatePanel(newData);
     }
 
     public void RefreshData()
     {
-        FetchAndDisplayData("http://localhost:5000/", aName);
-        FetchAndDisplayData("http://localhost:5000/1", aDescription);
-        FetchAndDisplayData("http://localhost:5000/2", aTheLink);
+        // Fetch and display initial data from the server
+        StartCoroutine(FetchAndDisplayData("http://localhost:5000/allData"));
     }
 
-    void FetchAndDisplayData(string url, Text targetText)
+    IEnumerator FetchAndDisplayData(string url)
     {
+        Debug.Log("Fetching data from: " + url);
         HTTPRequest request = new HTTPRequest(new System.Uri(url), HTTPMethods.Get, (originalRequest, response) =>
         {
             if (response.IsSuccess)
             {
                 string responseData = response.DataAsText;
-                targetText.text = responseData;
+                Data[] newData = JsonHelper.FromJson<Data>(responseData);
+
+                // Clear existing panels
+                foreach (Transform child in panelContainer)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                // Instantiate panels based on the fetched data
+                foreach (var item in newData)
+                {
+                    InstantiatePanel(item);
+                }
             }
             else
             {
                 Debug.LogError("HTTP request failed: " + response.Message);
             }
         });
+
         request.Send();
+
+        yield return null;
     }
 
-    public void OnDownloadButtonClick()
+    void InstantiatePanel(Data data)
     {
-        // Fetch the download link from the server
-        string downloadLink = aTheLink.text;
+        // Instantiate a new panel
+        GameObject panel = Instantiate(panelPrefab, panelContainer);
 
-        // Start the coroutine to download the file
-        StartCoroutine(DownloadFileCoroutine(downloadLink));
+        // Set the text values of the instantiated panel
+        panel.transform.Find("Name").GetComponent<Text>().text = "Name: " + data.name;
+        panel.transform.Find("Description").GetComponent<Text>().text = "Description: " + data.description;
+        panel.transform.Find("Link").GetComponent<Text>().text = "Link: " + data.url;
     }
 
-    IEnumerator DownloadFileCoroutine(string fileUrl)
+    // Ensure that the WebSocket is closed when the application quits
+    private void OnApplicationQuit()
     {
-        HTTPRequest request = new HTTPRequest(new System.Uri(fileUrl), HTTPMethods.Get, (originalRequest, response) =>
+        if (webSocket != null && webSocket.IsOpen)
         {
-            if (response.IsSuccess)
-            {
-                // Save the downloaded file
-                byte[] data = response.Data;
-                string savePath = Application.persistentDataPath + "/downloadedFile";
-                System.IO.File.WriteAllBytes(savePath, data);
-                Debug.Log("File downloaded and saved to: " + savePath);
-            }
-            else
-            {
-                Debug.LogError("Download failed: " + response.Message);
-            }
-        });
-
-        request.Send();
-
-        yield return null; // You might want to add more sophisticated waiting logic
+            webSocket.Close();
+        }
     }
+    [System.Serializable]
+    public class Data
+    {
+        public int id; // Unique identifier for each data entry
+        public string name;
+        public string description;
+        public string url;
+    }
+    [System.Serializable]
+    public class JsonHelper
+    {
+        public static T[] FromJson<T>(string json)
+        {
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+            return wrapper.Items;
+        }
+
+        [System.Serializable]
+        private class Wrapper<T>
+        {
+            public T[] Items;
+        }
+    }
+
 }
+
